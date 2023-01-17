@@ -175,18 +175,23 @@ defmodule LiveAdmin.Components.Container do
     """
   end
 
-  def render("list.html", assigns) do
-    mod =
-      assigns.resource.config
-      |> get_config(:components, [])
-      |> Keyword.get(:list, Index)
+  def render("list.html", %{resource: %{config: config}} = assigns) do
+    components = get_config(config, :components, [])
 
-    assigns = assign(assigns, :mod, mod)
+
+    assigns =
+      assign(
+        assigns,
+        :mod,
+        Keyword.get(components, :list, Index)
+      )
+      |> assign(:renderer, Keyword.get(components, :renderer, LiveAdmin.Components.FieldRenderer))
 
     ~H"""
     <.live_component
       module={@mod}
       id="list"
+      renderer={@renderer}
       socket={@socket}
       resources={@resources}
       key={@key}
@@ -239,6 +244,17 @@ defmodule LiveAdmin.Components.Container do
     />
     """
   end
+
+  def renderer(assigns) do
+    ~H"""
+    <a class="cell__contents" href="#">
+      <%= print(@contents) %>
+    </a>
+    """
+  end
+
+  defp print(term) when is_binary(term), do: term
+  defp print(term), do: inspect(term)
 
   def route_with_params(socket, segments, params \\ %{}) do
     params =

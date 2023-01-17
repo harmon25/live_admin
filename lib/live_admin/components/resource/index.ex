@@ -98,9 +98,8 @@ defmodule LiveAdmin.Components.Container.Index do
             <tr>
               <%= for {field, type, _} <- Resource.fields(@resource), contents = cell_contents(record, field, @resource, @resources) do %>
                 <td class={"resource__cell--#{type_to_css_class(type)} resource__cell--drop"}>
-                  <a class="cell__contents" href="#">
-                    <%= contents %>
-                  </a>
+                  <%= @renderer.field(%{contents: contents, field: field, record: record}) %>
+
                   <nav>
                     <ul>
                       <%= if @resource.schema.__schema__(:primary_key) |> List.first() == field do %>
@@ -319,7 +318,6 @@ defmodule LiveAdmin.Components.Container.Index do
     else
       record |> Map.fetch!(field)
     end
-    |> print()
   end
 
   defp list_link(socket, content, key, params, opts),

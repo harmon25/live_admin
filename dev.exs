@@ -233,6 +233,37 @@ defmodule Demo.Populator do
   defp get_user_if(false), do: nil
 end
 
+defmodule DemoWeb.FieldRenderer do
+  use Phoenix.Component
+
+  def field(%{contents: %NaiveDateTime{}} = assigns) do
+    ~H"""
+     <button type="button" class="cell__contents">
+       <span> <%= NaiveDateTime.to_string(@contents) %></span>
+     </button>
+    """
+  end
+
+  def field(%{contents: %Date{}} = assigns) do
+    ~H"""
+     <button type="button" class="cell__contents">
+       <span> <%= Date.to_string(@contents) %></span>
+     </button>
+    """
+  end
+
+  def field(assigns) do
+    ~H"""
+    <a type="button" class="cell__contents">
+      <%= print(@contents) %>
+    </a>
+    """
+  end
+
+  defp print(term) when is_binary(term), do: term
+  defp print(term), do: inspect(term)
+end
+
 defmodule DemoWeb.CreateUserForm do
   use Phoenix.LiveComponent
   use Phoenix.HTML
@@ -353,7 +384,7 @@ defmodule DemoWeb.Router do
         immutable_fields: [:encrypted_password, :inserted_at],
         validate_with: {Demo.Accounts.User, :validate, []},
         create_with: {Demo.Accounts.User, :create, []},
-        components: [new: DemoWeb.CreateUserForm],
+        components: [renderer: DemoWeb.FieldRenderer],
         label_with: :name,
         actions: [:deactivate],
         tasks: [:regenerate_passwords]
